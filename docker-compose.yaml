@@ -1,0 +1,34 @@
+services:
+  api-server:
+    image: api-server
+    build:
+      context: ${API_SERVER_DIR_PATH}  # Path to your Express app directory
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+
+  gateway-app:
+    image: gateway-app
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      CHATBOT_URL: http://chatbot-app:5000
+      API_SERVER_URL: http://api-server:3000
+    depends_on:
+      - chatbot-app
+      - api-server
+
+  chatbot-app:
+    image: subrat1729/knowledgebase-chatbot  # Replace with your Docker Hub image
+    ports:
+      - "3001:5000"  # Map container port 5000 to host port 6000
+    volumes:
+      - ${CHATBOT_KNOWLEGEBASE_PATH}:/app/knowledge_base.json
+    environment:
+      FLASK_ENV: production
+      APP_PORT: 5000
+      INPUT_PATH: /app/knowledge_base.json # Set the INPUT_PATH environment variable
