@@ -1,34 +1,56 @@
 services:
-  api-server:
-    image: api-server
-    build:
-      context: ${API_SERVER_DIR_PATH}  # Path to your Express app directory
-    ports:
-      - "3000:3000"
-    environment:
-      NODE_ENV: production
-
-  gateway-app:
-    image: gateway-app
+  api-gateway:
+    image: api-gateway
     build: .
     ports:
       - "4000:4000"
     environment:
       NODE_ENV: production
       PORT: 4000
-      CHATBOT_URL: http://chatbot-app:5000
+      HAYSTACK_API_URL: http://haystack-api:8000
       API_SERVER_URL: http://api-server:3000
     depends_on:
-      - chatbot-app
+      - haystack-api
       - api-server
 
-  chatbot-app:
-    image: subrat1729/knowledgebase-chatbot  # Replace with your Docker Hub image
+  api-server:
+    image: api-server
+    build:
+      context: ${API_SERVER_DIR_PATH} # Path to your Express app directory
     ports:
-      - "3001:5000"  # Map container port 5000 to host port 6000
-    volumes:
-      - ${CHATBOT_KNOWLEGEBASE_PATH}:/app/knowledge_base.json
+      - "3000:3000"
     environment:
-      FLASK_ENV: production
-      APP_PORT: 5000
-      INPUT_PATH: /app/knowledge_base.json # Set the INPUT_PATH environment variable
+      NODE_ENV: production
+
+  haystack-api:
+    image: "deepset/haystack:cpu"
+    volumes:
+      - ${HAYSTACK_DIR_PATH}/rest_api/rest_api/pipeline:/opt/pipelines
+    ports:
+      - 8000:8000
+    restart: on-failure
+    environment:
+      - DOCUMENTSTORE_PARAMS_HOST=elasticsearch
+      - PIPELINE_YAML_PATH=/opt/pipelines/pipelines.haystack-pipeline.yml
+      - TOKENIZERS_PARALLELISM=false
+      # Uncomment the following line to customise how much time (in seconds) a worker can spend serving a request
+      # before it times out. This should include the time required to cache the models and setup the pipelines.
+
+      # - GUNICORN_CMD_ARGS="--timeout=3000"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  elasticsearch:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:7.17.6"
+    ports:
+      - 9200:9200
+    restart: on-failure
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+    healthcheck:
+      test: curl --fail http://localhost:9200/_cat/health || exit 1
+      interval: 10s
+      timeout: 1s
+      retries: 10
