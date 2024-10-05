@@ -5,14 +5,14 @@ const app = express();
 if (!process.env.NODE_ENV?.toLowerCase()?.startsWith("prod")) {
   require("dotenv").config();
 }
-// Proxy requests to chatbot app if the path contains "/chatbot"
+// Proxy requests to haystack api if the path contains "/haystack"
 app.use(
-  "/chatbot",
+  "/haystack",
   createProxyMiddleware({
-    target: process.env.CHATBOT_URL ?? "http://chatbot-app:5000", // Flask service name and port from Docker Compose
+    target: process.env.HAYSTACK_API_URL ?? "http://haystack-api:8000", // Flask service name and port from Docker Compose
     changeOrigin: true,
     pathRewrite: {
-      "^/chatbot": "", // remove "/chatbot" from the forwarded request path
+      "^/haystack": "", // remove "/haystack" from the forwarded request path
     },
   })
 );
@@ -44,8 +44,8 @@ app.get("/health-check", (req, res) => {
   res.json({
     status: "OK",
     message: "API Gateway is running",
-  })
-})
+  });
+});
 
 // Start the orchestrator on port 4000
 const PORT = process.env.PORT || 4000;
