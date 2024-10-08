@@ -10,6 +10,10 @@ HAYSTACK_DIR_PATH=<path_to_your_haystack_directory> \
 docker compose up
 ```
 
+**Note:** It might take a while to run the `elasticsearch` and then `haystack-api`. Once you see the below `INFO` log, you can be sure that the haystack server is finally up and running.
+
+`haystack-api-1   | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)`
+
 #### Example
 
 ```sh
@@ -24,5 +28,6 @@ To stop the services, run `docker compose down`.
 
 1. Run the API server.
 2. Run haystack API using [Haystack docs](https://docs.haystack.deepset.ai/v1.26/docs/rest_api#running-http-api-without-docker).
-3. Add `.env` accordingly from `.env.example`.
-4. Run the API gateway using `npm run start`.
+3. Run Redis server.
+4. Add `.env` accordingly to the keys from `.env.example` and their corresponding value as per your setup.
+5. Run the API gateway using `npm run start`.
