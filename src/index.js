@@ -4,10 +4,18 @@ if (!process.env.NODE_ENV?.toLowerCase()?.startsWith("prod")) {
 
 const express = require("express");
 const { createProxyMiddleware } = require("http-proxy-middleware");
+const morgan = require("morgan");
 
 const limiter = require("./rate-limit");
 
 const app = express();
+
+// Log all requests
+app.use(
+  morgan(
+    ":method :url CODE :status SIZE :res[content-length] B TIME :response-time ms"
+  )
+);
 
 // Globally, rate limit all requests to the API Gateway
 app.use(
