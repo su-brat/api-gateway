@@ -4,6 +4,7 @@ services:
     build: .
     ports:
       - 4000:4000
+    restart: on-failure
     environment:
       NODE_ENV: production
       PORT: 4000
@@ -21,6 +22,7 @@ services:
       context: ${API_SERVER_DIR_PATH} # Path to your Express app directory
     ports:
       - 3000:3000
+    restart: on-failure
     environment:
       NODE_ENV: production
 
@@ -50,7 +52,7 @@ services:
     restart: on-failure
     environment:
       - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     healthcheck:
       test: curl --fail http://localhost:9200/_cat/health || exit 1
       interval: 30s
