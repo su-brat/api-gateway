@@ -1,0 +1,1 @@
+sudo API_SERVER_DIR_PATH=/home/ubuntu/app/v2/institute-api HAYSTACK_DIR_PATH=/home/ubuntu/app/v2/haystack docker compose up --build
